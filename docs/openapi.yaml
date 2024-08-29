@@ -1,0 +1,26 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Matricaria API 設計書
+  description: マトリカリアのAPI設計書です。
+
+servers:
+  - url: http://localhost:8080/v1
+    description: ローカル開発環境
+  - url: https://localhost:4040
+    description: ローカル環境 モック
+  - url: https://api.matricaria.example.com/v1
+    description: 本番環境
+
+tags:
+  - name: events
+    description: イベントAPI
+
+paths:
+  /events:
+    $ref: './parts/event.yaml#/paths/~1events'
+  /events/{id}:
+    $ref: './parts/event.yaml#/paths/~1events~1{id}'
+
+security:
+  - bearerAuth: []
