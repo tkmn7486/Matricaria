@@ -15,12 +15,16 @@ servers:
 tags:
   - name: events
     description: イベントAPI
+  - name: comment
+    description: コメントAPI
 
 paths:
   /events:
     $ref: './parts/event.yaml#/paths/~1events'
   /events/{id}:
     $ref: './parts/event.yaml#/paths/~1events~1{id}'
+  /comment:
+    $ref: './parts/event.yaml#/paths/~1comment'
 
 security:
   - bearerAuth: []

@@ -160,22 +160,129 @@ paths:
                 properties:
                   message:
                     type: string
+  /comment:
+    post:
+      summary: コメント作成
+      description: コメント作成
+      tags:
+        - comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comments'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comments'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 
 components:
   schemas:
     EventData:
       type: object
+      description: イベント情報
       properties:
         id:
           type: string
+          description: イベントID
           format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
         title:
           type: string
-        body:
+          description: イベント名
+          example: "テストイベント"
+        isOfficial:
+          type: boolean
+          description: |
+            - 公式イベントかどうか
+            - true:公式 | false:非公式
+          example: true
+        deadline:
           type: string
+          description: 募集期限
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
+        eventStart:
+          type: string
+          description: 開始時刻
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
+        eventEnd:
+          type: string
+          description: 終了時刻
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
+        eventPlaceName:
+          type: string
+          description: 開催地名
+          example: "居酒屋test"
+        eventPlaceAddress:
+          type: string
+          description: 開催地住所
+          example: "東京都渋谷区渋谷1-1-1"
+        owner:
+          type: string
+          description: 運営（開催者）
+          example: "運営 太郎"
+        eventDescription:
+          type: string
+          description: イベント詳細
+          example: "ここはイベント詳細です。\n改行もできます。"
+        attendList:
+          type: array
+          description: 参加者リスト
+          items:
+            type: string
+            format: uuid
+            example: 
+              - 123e4567-e89b-12d3-a456-426614174000
+              - 123e4567-e89b-12d3-a456-426614174001
+        memo:
+          type: string
+          description: メモ
+          example: "ここは備考欄です"
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
+    Comments:
+      type: object
+      description: コメント
+      properties:
+        id:
+          type: string
+          description: コメントID
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        eventId:
+          type: string
+          description: イベントID
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        comment:
+          type: string
+          description: コメント
+          example: "ここにコメントの文章が入ります。"
+        created_at:
+          type: string
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
