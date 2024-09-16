@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,7 @@ use Carbon\Carbon;
 class EventController extends Controller
 {
     /**
+     * 全イベントの取得
      * @param Request $request
      * @return mixed
      */
@@ -31,6 +33,7 @@ class EventController extends Controller
     }
 
     /**
+     * イベントの取得（ID指定）
      * @param Request $request
      * @param $id
      * @return mixed
@@ -41,7 +44,7 @@ class EventController extends Controller
         try {
             Log::info('イベント単体取得 --開始');
             $event = Event::where('id', $id)->first();
-            $comments = DB::table('comments')->where('event_id', $id)->get();
+            $comments = Comment::where('event_id', $id)->get();
 
             $info = (object) [
                 'event'   => $event,
@@ -60,7 +63,7 @@ class EventController extends Controller
     }
 
     /*
-    * コメントの取得
+    * コメントの取得（ID指定）
     * @param Request $request
     * @return mixed
     */
@@ -69,7 +72,7 @@ class EventController extends Controller
         DB::beginTransaction();
         try {
             Log::info('イベント単体取得 --開始');
-            $comments = DB::table('comments')->where('event_id', $event_id)->get();
+            $comments = Comment::where('event_id', $event_id)->get();
 
             return $comments;
             DB::commit();
@@ -83,6 +86,7 @@ class EventController extends Controller
     }
 
     /**
+     * イベントの新規作成
      * @param Request $request
      */
     public function createEvent (Request $request)
@@ -90,8 +94,7 @@ class EventController extends Controller
         DB::beginTransaction();
         try {
             Log::info('イベント登録 --開始');
-            DB::table('events')->insert([
-                'id' => 3,
+            Event::insert([
                 'event_name' => $request->event_name,
                 'is_official' => $request->is_official,
                 'deadline' => $request->deadline,
@@ -118,131 +121,166 @@ class EventController extends Controller
     }
 
     /**
+     * イベントの更新
      * @param Request $request
      * @param $id
      */
     public function updateEvent (Request $request, $id)
     {
-        DB::beginTransaction();
-        try {
-            Log::info('イベント更新 --開始');
-            DB::table('events')->where('id', $id)->update([
-                'event_name' => $request->event_name,
-                'is_official' => $request->is_official,
-                'deadline' => $request->deadline,
-                'event_start' => $request->event_start,
-                'event_end' => $request->event_end,
-                'event_place_name' => $request->event_place_name,
-                'event_place_address' => $request->event_place_address,
-                'owner' => $request->owner,
-                'event_description' => $request->event_description,
-                'attendees' => $request->attendees,
-                'memo' => $request->memo,
-                'created_at' => $request->created_at,
-                'updated_at' => $request->updated_at
-            ]);
-            DB::commit();
-            Log::info('イベント更新 --成功');
-        } catch (\Exception $e) {
-            Log::info('イベント更新 --失敗');
-            DB::rollBack();
-            Log::info($e);
-            throw $e;
+        $event = Event::where('id', $id)->first();
+        if(isset($event)){
+            DB::beginTransaction();
+            try {
+                Log::info('イベント更新 --開始');
+                Event::where('id', $id)->update([
+                    'event_name' => $request->event_name,
+                    'is_official' => $request->is_official,
+                    'deadline' => $request->deadline,
+                    'event_start' => $request->event_start,
+                    'event_end' => $request->event_end,
+                    'event_place_name' => $request->event_place_name,
+                    'event_place_address' => $request->event_place_address,
+                    'owner' => $request->owner,
+                    'event_description' => $request->event_description,
+                    'attendees' => $request->attendees,
+                    'memo' => $request->memo,
+                    'created_at' => $request->created_at,
+                    'updated_at' => $request->updated_at
+                ]);
+                DB::commit();
+                Log::info('イベント更新 --成功');
+            } catch (\Exception $e) {
+                Log::info('イベント更新 --失敗');
+                DB::rollBack();
+                Log::info($e);
+                throw $e;
+            }
+            Log::info('イベント更新 --終了');
+        }else{
+            Log::info('Error: イベントが見つかりませんでした');
+            throw new \Exception('イベントが存在しません');
         }
-        Log::info('イベント更新 --終了');
     }
 
     /**
+     * イベントの削除
      * @param Request $request
      * @param $id
      */
     public function deleteEvent (Request $request, $id)
     {
-        DB::beginTransaction();
-        try {
-            Log::info('イベント削除 --開始');
-            DB::table('events')->where('id', $id)->delete();
-            DB::commit();
-            Log::info('イベント削除 --成功');
-        } catch (\Exception $e) {
-            Log::info('イベント削除 --失敗');
-            DB::rollBack();
-            Log::info($e);
-            throw $e;
+        $event = Event::where('id', $id)->first();
+        if(isset($event)){
+            DB::beginTransaction();
+            try {
+                Log::info('イベント削除 --開始');
+                Event::where('id', $id)->delete();
+                DB::commit();
+                Log::info('イベント削除 --成功');
+            } catch (\Exception $e) {
+                Log::info('イベント削除 --失敗');
+                DB::rollBack();
+                Log::info($e);
+                throw $e;
+            }
+            Log::info('イベント削除 --終了');
+        }else{
+            Log::info('Error: イベントが見つかりませんでした');
+            throw new \Exception('イベントが存在しません');
         }
-        Log::info('イベント削除 --終了');
     }
 
     /**
-     * コメント追加
+     * コメントの新規追加
      * @param Request $request
      * @param $event_id
      */
-    public function addComment (Request $request, $event_id)
+    public function createComment (Request $request, $event_id)
     {
-        DB::beginTransaction();
-        try {
-            Log::info('コメント追加 --開始');
-            DB::table('comments')->insert([
-                'event_id' => $event_id,
-                'user_name' => $request->user_name,
-                'comment' => $request->comment,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ]);
-            DB::commit();
-            Log::info('コメント追加 --成功');
-        } catch (\Exception $e) {
-            Log::info('コメント追加 --失敗');
-            DB::rollBack();
-            Log::info($e);
-            throw $e;
+        $event = Event::where('id', $event_id)->first();
+
+        if(isset($event)){
+            DB::beginTransaction();
+            try {
+                Log::info('コメント追加 --開始');
+                Comment::insert([
+                    'event_id' => $event_id,
+                    'user_name' => $request->user_name,
+                    'comment' => $request->comment,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+                DB::commit();
+                Log::info('コメント追加 --成功');
+            } catch (\Exception $e) {
+                Log::info('コメント追加 --失敗');
+                DB::rollBack();
+                Log::info($e);
+                throw $e;
+            }
+            Log::info('コメント追加 --終了');
+        }else{
+            Log::info('Error: イベントが見つかりませんでした');
+            throw new \Exception('イベントが存在しません');
         }
-        Log::info('コメント追加 --終了');
     }
 
     /**
+     * コメントの更新
      * @param Request $request
      * @param $id
      */
     public function updateComment (Request $request, $id)
     {
-        DB::beginTransaction();
-        try {
-            Log::info('コメント更新 --開始');
-            DB::table('comments')->where('id', $id)->update([
-                'comment' => $request->comment,
-                'updated_at' => Carbon::now()
-            ]);
-            DB::commit();
-            Log::info('コメント更新 --成功');
-        } catch (\Exception $e) {
-            Log::info('コメント更新 --失敗');
-            DB::rollBack();
-            Log::info($e);
-            throw $e;
+        $comment = Comment::where('id', $id)->first();
+        if(isset($comment)){
+            DB::beginTransaction();
+            try {
+                Log::info('コメント更新 --開始');
+                Comment::where('id', $id)->update([
+                    'comment' => $request->comment,
+                    'updated_at' => Carbon::now()
+                ]);
+                DB::commit();
+                Log::info('コメント更新 --成功');
+            } catch (\Exception $e) {
+                Log::info('コメント更新 --失敗');
+                DB::rollBack();
+                Log::info($e);
+                throw $e;
+            }
+            Log::info('コメント更新 --終了');
+        }else{
+            Log::info('Error: コメントが見つかりませんでした');
+            throw new \Exception('コメントが存在しません');
         }
-        Log::info('コメント更新 --終了');
     }
 
     /**
+     * コメントの削除
      * @param Request $request
      * @param $id
      */
     public function deleteComment (Request $request, $id)
     {
-        DB::beginTransaction();
-        try {
-            Log::info('コメント削除 --開始');
-            DB::table('comments')->where('id', $id)->delete();
-            DB::commit();
-            Log::info('コメント削除 --成功');
-        } catch (\Exception $e) {
-            Log::info('コメント削除 --失敗');
-            DB::rollBack();
-            Log::info($e);
-            throw $e;
+        $comment = Comment::where('id', $id)->first();
+        if(isset($comment)){
+            DB::beginTransaction();
+            try {
+                Log::info('コメント削除 --開始');
+                Comment::where('id', $id)->delete();
+                DB::commit();
+                Log::info('コメント削除 --成功');
+            } catch (\Exception $e) {
+                Log::info('コメント削除 --失敗');
+                DB::rollBack();
+                Log::info($e);
+                throw $e;
+            }
+            Log::info('コメント削除 --終了');
+        }else{
+            Log::info('Error: コメントが見つかりませんでした');
+            throw new \Exception('コメントが存在しません');
         }
-        Log::info('コメント削除 --終了');
     }
 }
