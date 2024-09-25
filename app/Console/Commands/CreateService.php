@@ -23,7 +23,7 @@ class CreateService extends Command
     /**
      * @const string service dir path
      */
-    public const SERVICES_PATH = 'app/Services/';
+    public const SERVICES_PATH = 'app/Http/Services/';
 
     /**
      * @var string
