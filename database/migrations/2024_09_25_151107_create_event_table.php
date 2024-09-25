@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event', function (Blueprint $table) {
-            $table->id()->comment('イベントID');
+        Schema::create('events', function (Blueprint $table) {
+            $table->bigIncrements('id')->comment('イベントID');
             $table->string('event_name')->comment('イベント名');
             $table->text('event_description')->comment('イベント説明');
             $table->boolean('is_official')->comment('公式イベントかどうか');
