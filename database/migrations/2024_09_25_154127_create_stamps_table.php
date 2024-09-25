@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('stamps', function (Blueprint $table) {
-            $table->bigIncrements('id');->comment('スタンプID');
+            $table->bigIncrements('id')->comment('スタンプID');
             $table->string('stamp_name')->comment('スタンプ名');
             $table->timestamps();
         });
