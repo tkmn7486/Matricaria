@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->timestamp('deadline')->change();
-            $table->boolean('is_official')->default(false)->change();
+        Schema::create('stamps', function (Blueprint $table) {
+            $table->bigIncrements('id')->comment('スタンプID');
+            $table->string('stamp_name')->comment('スタンプ名');
+            $table->timestamps();
         });
     }
 
@@ -22,9 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->date('deadline')->change();
-            $table->dropColumn('is_official');
-        });
+        Schema::dropIfExists('stamps');
     }
 };

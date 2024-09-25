@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('comments', function (Blueprint $table) {
-            $table->id()->index();
-            $table->string('event_id');
-            $table->string('user_name')->default('名無し');
-            $table->longText('comment')->nullable();
+            $table->bigIncrements('id')->comment('ID');
+            $table->integer('event_id')->comment('イベントID');
+            $table->string('user_name')->comment('ユーザー名');
+            $table->text('comment')->comment('コメント');
+            $table->string('stamp_id')->nullable()->comment('スタンプID');
             $table->timestamps();
         });
     }

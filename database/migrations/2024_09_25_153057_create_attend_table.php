@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->longText('attendees')->nullable()->comment('参加者');
+        Schema::create('attends', function (Blueprint $table) {
+            $table->bigIncrements('id')->comment('ID');
+            $table->integer('event_id')->comment('イベントID');
+            $table->string('attend')->comment('参加者名');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->dropColumn('atetndees');
-        });
+        Schema::dropIfExists('attend');
     }
 };
