@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attend', function (Blueprint $table) {
+        Schema::create('attends', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('ID');
             $table->integer('event_id')->comment('イベントID');
             $table->string('attend')->comment('参加者名');
