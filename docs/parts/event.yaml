@@ -286,11 +286,9 @@ components:
         attends:
           type: array
           description: 参加者リスト
-          items:
-            type: string
-            example: 
-              - "テスト太郎"
-              - "テスト花子"
+          example: 
+            - "テスト太郎"
+            - "テスト花子"
         comments:
           type: array
           items:
