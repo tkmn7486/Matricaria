@@ -6,28 +6,45 @@ info:
 paths:
   /events:
     get:
-      summary: イベント一覧取得
-      description: イベント一覧取得
+      summary: イベント情報取得
+      description: 指定したeidに紐づくイベント情報を取得するAPI
       tags:
         - events
+      parameters:
+        - name: eid
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EventData'
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EventData'
+                required:
+                  - events
         '404':
           description: Not found
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/InternalServerError'
     post:
       summary: イベント作成
       description: イベント作成
@@ -38,70 +55,40 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventData'
+              $ref: '#/components/schemas/CreateEventData'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventData' 
-        '409':
-          description: Conflict
+                $ref: '#/components/schemas/CreatedEvent'
+        '500':
+          description: Internal Server Error
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  message:
-                    type: string
-  /events/{id}:
-    get:
-      summary: イベント単体取得
-      description: イベント単体取得
-      tags:
-        - events
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventData'
-        '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/InternalServerError'
+
     put:
       summary: イベント編集
-      description: イベント編集
+      description: イベントを編集するAPI（パスワード必須）
       tags:
         - events
       parameters:
-        - name: id
-          in: path
+        - name: event_password
+          in: query
           required: true
           schema:
             type: string
-            format: uuid
+            example: "Password!01"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventData'
+              $ref: '#/components/schemas/CreateEventData'
       responses:
         '200':
           description: OK
@@ -115,40 +102,34 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  message:
-                    type: string
-        '409':
-          description: Conflict
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
           content:
             application/json:
               schema:
                 type: object
-                required:
-                  - code
-                  - message
-                properties:
-                  code:
-                    type: integer
-                    format: int32
-                  message:  
-                    type: string
-                    example: "Conflict"
+                $ref: '#/components/schemas/InternalServerError'
     delete:
       summary: イベント削除
       description: イベント削除
       tags:
         - events
       parameters:
-        - name: id
-          in: path
+        - name: eid
+          in: query
           required: true
           schema:
             type: string
             format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+        - name: event_password
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "Password!01"
       responses:
-        '200':
-          description: OK
         '204':
           description: No content
         '404':
@@ -157,115 +138,104 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/InternalServerError'
   /comment:
     post:
       summary: コメント作成
       description: コメント作成
       tags:
         - comment
+      parameters:
+        - name: eid
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Comments'
+              $ref: '#/components/schemas/CreateComment'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Comments'
-        '409':
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-    get:
-      summary: コメント取得
-      description: コメント取得
-      tags:
-        - comment
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Comments'
+                $ref: '#/components/schemas/CreateComment'
         '404':
           description: Not found
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  message:
-                    type: string
-    put:
-      summary: コメント編集
-      description: コメント編集
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/InternalServerError'
+    delete:
+      summary: コメント削除
+      description: コメントを削除するAPI（パスワード必須）
       tags:
         - comment
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Comments'
+      parameters:
+        - name: commentId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
       responses:
-        '200':
-          description: OK
+        '204':
+          description: No content
         '404':
           description: Not found
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  message:
-                    type: string
-        '409':
-          description: Conflict
+                $ref: '#/components/schemas/NotFound'
+        '500':
+          description: Internal Server Error
           content:
             application/json:
               schema:
                 type: object
-                required:
-                  - code
-                  - message
-                properties:
-                  code:
-                    type: integer
-                    format: int32
-                  message:  
-                    type: string
-                    example: "Conflict"
-
+                $ref: '#/components/schemas/InternalServerError'
 components:
   schemas:
     EventData:
       type: object
       description: イベント情報
       properties:
-        id:
+        eid:
           type: string
           description: イベントID
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
-        title:
+        eventName:
           type: string
           description: イベント名
           example: "テストイベント"
+        description:
+          type: string
+          description: イベント詳細
+          example: "ここはイベント詳細です。\n改行もできます。"
         isOfficial:
           type: boolean
           description: |
@@ -295,23 +265,14 @@ components:
           type: string
           description: 開催地住所
           example: "東京都渋谷区渋谷1-1-1"
+        gmUrl:
+          type: string
+          description: GoogleMapのURL
+          example: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3243.1098648249003!2d139.71866407680454!3d35.62501797260548!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188ae4cfa55555%3A0x59e9e0773c9156ab!2z44OV44Kn44Oz44Oq44Or5qCq5byP5Lya56S-IOadseS6rOacrOekvg!5e0!3m2!1sja!2sjp!4v1734783252600!5m2!1sja!2sjp"
         owner:
           type: string
           description: 運営（開催者）
           example: "運営 太郎"
-        eventDescription:
-          type: string
-          description: イベント詳細
-          example: "ここはイベント詳細です。\n改行もできます。"
-        attendList:
-          type: array
-          description: 参加者リスト
-          items:
-            type: string
-            format: uuid
-            example: 
-              - 123e4567-e89b-12d3-a456-426614174000
-              - 123e4567-e89b-12d3-a456-426614174001
         memo:
           type: string
           description: メモ
@@ -322,20 +283,117 @@ components:
         updated_at:
           type: string
           format: date-time
-    Comments:
+        attends:
+          type: array
+          description: 参加者リスト
+          items:
+            type: string
+            example: 
+              - "テスト太郎"
+              - "テスト花子"
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+      required:
+        - eid
+        - eventName
+        - eventStart
+        - eventEnd
+        - eventPlaceName
+        - owner
+        - created_at
+        - attends
+        - comments
+
+    CreateEventData:
       type: object
-      description: コメント
+      description: イベント作成
       properties:
-        id:
-          type: string
-          description: コメントID
-          format: uuid
-          example: 123e4567-e89b-12d3-a456-426614174000
-        eventId:
+        eid:
           type: string
           description: イベントID
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
+        eventName:
+          type: string
+          description: イベント名
+          example: "テストイベント"
+        description:
+          type: string
+          description: イベント詳細
+          example: "ここはイベント詳細です。\n改行もできます。"
+        isOfficial:
+          type: boolean
+          description: |
+            - 公式イベントかどうか
+            - true:公式 | false:非公式
+          example: true
+        deadline:
+          type: string
+          description: 募集期限
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
+        eventStart:
+          type: string
+          description: 開始時刻
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
+        eventEnd:
+          type: string
+          description: 終了時刻
+          format: date-time
+          example: "2021-12-31T23:59:59+09:00"
+        eventPlaceName:
+          type: string
+          description: 開催地名
+          example: "居酒屋test"
+        eventPlaceAddress:
+          type: string
+          description: 開催地住所
+          example: "東京都渋谷区渋谷1-1-1"
+        gmUrl:
+          type: string
+          description: GoogleMapのURL
+          example: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3243.1098648249003!2d139.71866407680454!3d35.62501797260548!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188ae4cfa55555%3A0x59e9e0773c9156ab!2z44OV44Kn44Oz44Oq44Or5qCq5byP5Lya56S-IOadseS6rOacrOekvg!5e0!3m2!1sja!2sjp!4v1734783252600!5m2!1sja!2sjp"
+        owner:
+          type: string
+          description: 運営（開催者）
+          example: "運営 太郎"
+        memo:
+          type: string
+          description: メモ
+          example: "ここは備考欄です"
+        attends:
+          type: array
+          description: 参加者リスト
+          items:
+            type: string
+            example: 
+              - "テスト太郎"
+              - "テスト花子"
+      required:
+        - eid
+        - eventName
+        - eventStart
+        - eventEnd
+        - eventPlaceName
+        - owner
+        - created_at
+        - attends
+
+    Comment:
+      type: object
+      properties:
+        commentId:
+          type: string
+          description: コメントID
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        userName:
+          type: string
+          description: ユーザー名
+          example: "テスト太郎"
         comment:
           type: string
           description: コメント
@@ -343,8 +401,61 @@ components:
         created_at:
           type: string
           format: date-time
-          example: "2021-12-31T23:59:59+09:00"
-        updated_at:
+          example: "2024-12-20T10:00:00+09:00"
+
+    CreateComment:
+      type: object
+      description: コメント
+      properties:
+        userName:
           type: string
-          format: date-time
-          example: "2021-12-31T23:59:59+09:00"
+          description: ユーザー名
+          example: "テスト太郎"
+        comment:
+          type: string
+          description: コメント
+          example: "ここにコメントの文章が入ります。"
+        stamp_id:
+          type: string
+          description: スタンプID
+          example: null
+    
+    CreatedEvent:
+      type: object
+      description: イベント作成
+      properties:
+        eid: 
+          type: string
+          description: イベントID
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        password:
+          type: string
+          description: イベントパスワード
+          example: "Password!01"
+    
+    NotFound:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "E404001"
+        message:
+          type: string
+          example: "NotFound"
+        details:
+          type: string
+          example: "指定されたeidのデータが見つかりませんでした"
+    
+    InternalServerError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "E500001"
+        message:
+          type: string
+          example: "InternalServerError"
+        details:
+          type: string
+          example: "サーバーエラーが発生しました"
