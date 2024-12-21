@@ -21,8 +21,6 @@ tags:
 paths:
   /events:
     $ref: './parts/event.yaml#/paths/~1events'
-  /events/{id}:
-    $ref: './parts/event.yaml#/paths/~1events~1{id}'
   /comment:
     $ref: './parts/event.yaml#/paths/~1comment'
 
